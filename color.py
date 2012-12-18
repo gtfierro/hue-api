@@ -5,6 +5,22 @@ lights) and RGB 3-tuples (the format understood by most everyone else)
 Author: Gabe Fierro
 """
 
+def convert_hsb_to_canonical(hue, saturation, brightness):
+    """
+    Takes in a HSB 3-tuple and converts it to the canonical space
+    0 <= hue <= 360
+    0 <= saturation <= 1
+    0 <= brightness <= 1
+
+    Assumes the Hue Light space:
+    0 <= hue <= 65535
+    0 <= saturation <= 254
+    0 <= brightness <= 254
+    """
+    hue = min(360, hue / 182.0) if hue > 360 else hue
+    saturation = saturation / 254.0 if saturation > 1 else saturation
+    brightness = brightness / 254.0 if brightness > 1 else brightness
+    return (hue, saturation, brightness)
 
 def hsb_to_rgb(hue,saturation,brightness):
     """ 
@@ -13,9 +29,7 @@ def hsb_to_rgb(hue,saturation,brightness):
     """
 
     # convert from HueLight space to canonical HSV space
-    hue = min(360, hue / 182.0) if hue > 360 else hue
-    saturation = saturation / 254.0 if saturation > 1 else saturation
-    brightness = brightness / 254.0 if brightness > 1 else brightness
+    hue, saturation, brightness = convert_hsb_to_canonical(hue, saturation, brightness)
 
 
     # compute chroma from hsb
