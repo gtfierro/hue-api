@@ -22,6 +22,15 @@ def convert_hsb_to_canonical(hue, saturation, brightness):
     brightness = brightness / 254.0 if brightness > 1 else brightness
     return (hue, saturation, brightness)
 
+def convert_hsb_to_hue(hue, saturation, brightness):
+    """
+    Takes in HSB 3-tuple and converts it to the Hue Light space
+    """
+    hue = min(65535, hue * 182.0)
+    saturation = saturation * 254.0
+    brightness = brightness * 254.0
+    return (hue, saturation, brightness)
+
 def hsb_to_rgb(hue,saturation,brightness):
     """ 
     Takes in a 3-tuple of [hue], [saturation] and [brightness] (all float
