@@ -17,27 +17,33 @@ server_url = 'http://%s/api/YourAppName/lights/' % server_ip
 class HueServer(resource.Resource):
   isLeaf = True
 
-  def render_GET(self, request):
-    print 'GET state of light',
-    light_number = request.uri.split('/')[-1]
-    print light_number
-    status = requests.get(server_url+light_number)
-    res = json.loads(status.text)
-    if isinstance(res,list):
-      if 'error' in res[0]:
+  def parse_response(self, response):
+    if isinstance(response,list):
+      if 'error' in response[0]:
         print 'ERROR connecting to light',light_number
+        print response[0]
         return '-1,-1,-1'
     else:
-      state = res['state']
+      state = response['state']
       h,s,b = state['hue'],state['sat'],state['bri']
       return ','.join(map(str,[h,s,b]))
 
-  def render_POST(self, request):
-    print request.args
-    print request.uri
-    print request.content.read()
-    return "POST:"
+  def render_GET(self, request):
+    light_number = request.uri.split('/')[-1]
+    print 'GET state of light',
+    print light_number
+    status = requests.get(server_url+light_number)
+    res = json.loads(status.text)
+    return self.parse_response(res)
 
+  def render_PUT(self, request):
+    light_number = request.uri.split('/')[-1]
+    data = request.content.read()
+    print 'PUT change light',light_number,
+    print 'data:',data
+    status = requests.put(server_url+light_number+'/state', data)
+    res = json.loads(status.text)
+    return self.parse_response(res)
 
 site = server.Site(HueServer())
 reactor.listenTCP(8080, site)
